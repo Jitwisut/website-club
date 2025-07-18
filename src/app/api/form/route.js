@@ -1,42 +1,44 @@
 // src/app/form/route.js
-// WARNING: This SQLite implementation is NOT recommended for production environments
-// where data persistence and concurrent writes are critical, especially on serverless platforms
-// like Vercel/Netlify due to their ephemeral filesystems. Data will be lost.
-
 import { NextResponse } from "next/server";
-import sqlite3 from "sqlite3";
-import { open } from "sqlite";
+import { MongoClient } from "mongodb"; // Import MongoClient from mongodb driver
 
-// Function to open/create the SQLite database connection
-export async function openDB() {
-  const db = await open({
-    filename: ":memory:", // SQLite in-memory database
-    driver: sqlite3.Database,
-  });
+// Environment variable for MongoDB URI
+const MONGODB_URI = process.env.MONGODB_URI;
+console.log(MONGODB_URI);
+// Check if MONGODB_URI is defined
+if (!MONGODB_URI) {
+  throw new Error(
+    "Please define the MONGODB_URI environment variable inside .env.local"
+  );
+}
 
-  await db.run(`
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      aka TEXT,
-      name TEXT,
-      stuid TEXT UNIQUE,       
-      faculty TEXT,
-      email TEXT UNIQUE,      
-      disname TEXT,
-      level TEXT,
-      interested TEXT,
-      experience TEXT,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-  // FIX: Removed dbPath from console.log as it's an in-memory DB
-  console.log("Success: In-memory database table 'users' ensured to exist.");
-  return db;
+// Global variable to store the MongoDB client
+// This is crucial for re-using the connection in serverless environments
+let cachedClient = null;
+let cachedDb = null;
+
+// Function to connect to MongoDB and return the database instance
+async function connectToDatabase() {
+  // If we have a cached connection, use it
+  if (cachedClient && cachedDb) {
+    return { client: cachedClient, db: cachedDb };
+  }
+
+  // If no cached client, create a new one
+  const client = await MongoClient.connect(MONGODB_URI);
+  const db = client.db(); // Get the default database from the URI
+
+  // Cache the client and database for future use
+  cachedClient = client;
+  cachedDb = db;
+
+  console.log("Successfully connected to MongoDB.");
+  return { client, db };
 }
 
 // POST handler for form submission
 export async function POST(request) {
-  let db;
+  let client; // Declare client here to ensure it's accessible in finally block
   try {
     const body = await request.json();
     const {
@@ -100,63 +102,62 @@ export async function POST(request) {
     }
     // --- End Validation ---
 
-    db = await openDB(); // Open database connection
+    const { db } = await connectToDatabase(); // Connect to MongoDB
+    const usersCollection = db.collection("users"); // Get the 'users' collection
 
-    // --- REMOVED DUPLICATE CHECK SELECT QUERY HERE ---
-    // Instead, rely on the UNIQUE constraint of the database and handle the error.
-
-    const insertQuery = `
-      INSERT INTO users (aka, name, stuid, faculty, email, disname, level, interested, experience)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-    const queriescheck = `SELECT stuid,email FROM users WHERE stuid=? OR email=?`;
-    const existingUser = await db.get(queriescheck, [stuid, email]);
-
-    if (existingUser) {
-      return NextResponse.json(
-        {
-          error: "อีเมลหรือรหัสนักศึกษามีคนใช้งานไปแล้ว",
-        },
-
-        { status: 400 }
+    // MongoDB handles unique constraints automatically via indexes.
+    // We will rely on the insert operation to throw an error if a duplicate is found.
+    // First, ensure unique indexes are created (can be done once manually or programmatically)
+    // For production, it's better to create indexes on deployment or manually.
+    // For this example, we'll try to create it here (it will only create if it doesn't exist)
+    try {
+      await usersCollection.createIndex({ stuid: 1 }, { unique: true });
+      await usersCollection.createIndex({ email: 1 }, { unique: true });
+      console.log("Unique indexes for stuid and email ensured.");
+    } catch (indexError) {
+      // This error is usually fine if index already exists
+      console.warn(
+        "Could not create index (might already exist):",
+        indexError.message
       );
     }
-    const values = [
-      aka.trim(),
-      name.trim(),
-      String(stuid).trim(),
-      faculty.trim(),
-      email.trim(),
-      disname.trim(),
-      level.trim(),
-      interested.trim(),
-      experience.trim(),
-    ];
 
-    // Attempt to insert the data. If stuid or email are not unique, db.run will throw an error.
-    await db.run(insertQuery, values);
+    const newUser = {
+      aka: aka.trim(),
+      name: name.trim(),
+      stuid: String(stuid).trim(),
+      faculty: faculty.trim(),
+      email: email.trim(),
+      disname: disname.trim(),
+      level: level.trim(),
+      interested: interested.trim(), // Store as comma-separated string
+      experience: experience.trim(),
+      created_at: new Date(), // Add timestamp
+    };
 
-    console.log("Successfully inserted user:", { aka, email });
+    // Attempt to insert the new user document
+    const result = await usersCollection.insertOne(newUser);
+
+    console.log("Successfully inserted user with ID:", result.insertedId);
     return NextResponse.json(
-      { message: "Success: Welcome to the club!" },
+      { message: "Success: Welcome to the club!", userId: result.insertedId },
       { status: 201 }
     );
   } catch (error) {
     console.error("Form submission error:", error);
 
-    // Handle UNIQUE constraint error from SQLite
-    // The error message for unique constraint violation in sqlite3 typically contains 'SQLITE_CONSTRAINT_UNIQUE'
-    if (error.message && error.message.includes("SQLITE_CONSTRAINT_UNIQUE")) {
+    // Handle MongoDB duplicate key error (code 11000)
+    if (error.code === 11000) {
       let field = "ข้อมูล"; // Default message
-      // Try to be more specific based on the error message details
-      if (error.message.includes("users.stuid")) {
+      // MongoDB error message for duplicate key usually contains the field name
+      if (error.message.includes("stuid")) {
         field = "รหัสนักศึกษา";
-      } else if (error.message.includes("users.email")) {
+      } else if (error.message.includes("email")) {
         field = "อีเมล";
       }
       return NextResponse.json(
-        { error: `${field} นี้มีผู้ใช้งานไปแล้ว` }, // More specific error message
-        { status: 409 } // Use 409 Conflict for duplicate data
+        { error: `${field} นี้มีผู้ใช้งานไปแล้ว` },
+        { status: 409 } // 409 Conflict
       );
     }
 
@@ -168,12 +169,9 @@ export async function POST(request) {
       },
       { status: 500 }
     );
-  } finally {
-    if (db) {
-      await db.close();
-      console.log("Database connection closed.");
-    }
   }
+  // No finally block for client.close() as we are caching the client for re-use
+  // The client will stay open across multiple invocations in serverless environments
 }
 
 // OPTIONS handler for CORS preflight requests (if needed)
@@ -181,7 +179,7 @@ export async function OPTIONS(request) {
   return new NextResponse(null, {
     status: 204,
     headers: {
-      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Origin": "*", // Be specific in production, e.g., 'https://yourfrontenddomain.com'
       "Access-Control-Allow-Methods": "POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, Authorization",
       "Access-Control-Max-Age": "86400",
