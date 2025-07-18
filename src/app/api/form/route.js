@@ -10,21 +10,18 @@ import { open } from "sqlite";
 // Function to open/create the SQLite database connection
 export async function openDB() {
   const db = await open({
-    // เปลี่ยน filename เป็น ":memory:" เพื่อให้ SQLite สร้างฐานข้อมูลใน RAM
-    filename: ":memory:",
+    filename: ":memory:", // SQLite in-memory database
     driver: sqlite3.Database,
   });
-  // Create table if it doesn't exist
-  // Note: For 'stuid' and 'email', added UNIQUE constraint.
-  // 'interested' is TEXT, assuming comma-separated string.
+
   await db.run(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       aka TEXT,
       name TEXT,
-      stuid TEXT UNIQUE,       -- Changed to TEXT and UNIQUE
+      stuid TEXT UNIQUE,       
       faculty TEXT,
-      email TEXT UNIQUE,      -- Added UNIQUE
+      email TEXT UNIQUE,      
       disname TEXT,
       level TEXT,
       interested TEXT,
@@ -32,13 +29,14 @@ export async function openDB() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
-  console.log("Success: Database table 'users' ensured to exist at:", dbPath);
+  // FIX: Removed dbPath from console.log as it's an in-memory DB
+  console.log("Success: In-memory database table 'users' ensured to exist.");
   return db;
 }
 
 // POST handler for form submission
 export async function POST(request) {
-  let db; // Declare db outside try-catch to ensure it's accessible in finally
+  let db;
   try {
     const body = await request.json();
     const {
@@ -54,7 +52,6 @@ export async function POST(request) {
     } = body;
 
     // --- Server-side Input Validation ---
-    // Check if all required fields are present and not just empty strings after trimming
     if (
       !aka ||
       aka.trim() === "" ||
@@ -72,7 +69,7 @@ export async function POST(request) {
       level.trim() === "" ||
       !experience ||
       experience.trim() === "" ||
-      !interested // Check if 'interested' property exists
+      !interested
     ) {
       console.error("Validation Error: Missing or empty required fields.");
       return NextResponse.json(
@@ -81,7 +78,6 @@ export async function POST(request) {
       );
     }
 
-    // Specific validation for 'interested' (assuming it's a comma-separated string)
     const interestedArray = interested
       .split(",")
       .map((item) => item.trim())
@@ -95,7 +91,6 @@ export async function POST(request) {
       );
     }
 
-    // Basic email format validation (more robust validation should use a library)
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       console.error("Validation Error: Invalid email format.");
       return NextResponse.json(
@@ -103,26 +98,17 @@ export async function POST(request) {
         { status: 400 }
       );
     }
+    // --- End Validation ---
 
-    // Open database connection
-    db = await openDB();
-    const queriescheck = `SELECT stuid,email FROM users WHERE stuid=? OR email=?`;
-    const query = `
+    db = await openDB(); // Open database connection
+
+    // --- REMOVED DUPLICATE CHECK SELECT QUERY HERE ---
+    // Instead, rely on the UNIQUE constraint of the database and handle the error.
+
+    const insertQuery = `
       INSERT INTO users (aka, name, stuid, faculty, email, disname, level, interested, experience)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
-    const existingUser = await db.get(queriescheck, [stuid, email]);
-    if (existingUser) {
-      return NextResponse.json(
-        {
-          error: "อีเมลหรือรหัสนักศึกษามีคนใช้งานไปแล้ว",
-        },
-        { status: 400 }
-      );
-    }
-
-    // Use parameterized queries to prevent SQL Injection
-    // FIX: Correctly pass the 'values' array directly, not wrapped in another array.
     const values = [
       aka.trim(),
       name.trim(),
@@ -135,7 +121,8 @@ export async function POST(request) {
       experience.trim(),
     ];
 
-    await db.run(query, values); // Corrected: passing values directly
+    // Attempt to insert the data. If stuid or email are not unique, db.run will throw an error.
+    await db.run(insertQuery, values);
 
     console.log("Successfully inserted user:", { aka, email });
     return NextResponse.json(
@@ -145,7 +132,23 @@ export async function POST(request) {
   } catch (error) {
     console.error("Form submission error:", error);
 
-    // Generic error for other cases
+    // Handle UNIQUE constraint error from SQLite
+    // The error message for unique constraint violation in sqlite3 typically contains 'SQLITE_CONSTRAINT_UNIQUE'
+    if (error.message && error.message.includes("SQLITE_CONSTRAINT_UNIQUE")) {
+      let field = "ข้อมูล"; // Default message
+      // Try to be more specific based on the error message details
+      if (error.message.includes("users.stuid")) {
+        field = "รหัสนักศึกษา";
+      } else if (error.message.includes("users.email")) {
+        field = "อีเมล";
+      }
+      return NextResponse.json(
+        { error: `${field} นี้มีผู้ใช้งานไปแล้ว` }, // More specific error message
+        { status: 409 } // Use 409 Conflict for duplicate data
+      );
+    }
+
+    // Generic error for other unexpected issues
     return NextResponse.json(
       {
         error: "An unexpected error occurred. Please try again.",
@@ -154,7 +157,6 @@ export async function POST(request) {
       { status: 500 }
     );
   } finally {
-    // Ensure the database connection is closed after every request
     if (db) {
       await db.close();
       console.log("Database connection closed.");
@@ -167,10 +169,10 @@ export async function OPTIONS(request) {
   return new NextResponse(null, {
     status: 204,
     headers: {
-      "Access-Control-Allow-Origin": "*", // Be specific in production, e.g., 'https://yourfrontenddomain.com'
+      "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      "Access-Control-Max-Age": "86400", // Cache preflight for 24 hours
+      "Access-Control-Max-Age": "86400",
     },
   });
 }
