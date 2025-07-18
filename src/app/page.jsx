@@ -196,7 +196,8 @@ export default function DevSignupForm() {
                   name="aka"
                   value={formData.aka}
                   onChange={handleInputChange}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 bg-white/50"
+                  // ADDED: text-gray-800 for input text color, placeholder-gray-500 for placeholder color
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 bg-white/50 text-gray-800 placeholder-gray-500"
                   placeholder="ชื่อเล่นที่ใช้ในชุมชน"
                 />
               </div>
@@ -214,7 +215,8 @@ export default function DevSignupForm() {
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 bg-white/50"
+                  // ADDED: text-gray-800 for input text color, placeholder-gray-500 for placeholder color
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 bg-white/50 text-gray-800 placeholder-gray-500"
                   placeholder="ชื่อจริงของคุณ"
                 />
               </div>
@@ -232,7 +234,8 @@ export default function DevSignupForm() {
                   name="stuid"
                   value={formData.stuid}
                   onChange={handleInputChange}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 bg-white/50"
+                  // ADDED: text-gray-800 for input text color, placeholder-gray-500 for placeholder color
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 bg-white/50 text-gray-800 placeholder-gray-500"
                   placeholder="รหัสนักศึกษา"
                 />
               </div>
@@ -250,7 +253,8 @@ export default function DevSignupForm() {
                   name="faculty"
                   value={formData.faculty}
                   onChange={handleInputChange}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 bg-white/50"
+                  // ADDED: text-gray-800 for input text color, placeholder-gray-500 for placeholder color
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 bg-white/50 text-gray-800 placeholder-gray-500"
                   placeholder="เช่น วิศวกรรมคอมพิวเตอร์ ปี 2"
                 />
               </div>
@@ -268,7 +272,8 @@ export default function DevSignupForm() {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 bg-white/50"
+                  // ADDED: text-gray-800 for input text color, placeholder-gray-500 for placeholder color
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 bg-white/50 text-gray-800 placeholder-gray-500"
                   placeholder="your@email.com"
                 />
               </div>
@@ -286,7 +291,8 @@ export default function DevSignupForm() {
                   name="disname"
                   value={formData.disname}
                   onChange={handleInputChange}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 bg-white/50"
+                  // ADDED: text-gray-800 for input text color, placeholder-gray-500 for placeholder color
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 bg-white/50 text-gray-800 placeholder-gray-500"
                   placeholder="username#1234"
                 />
               </div>
@@ -303,6 +309,7 @@ export default function DevSignupForm() {
               name="level"
               value={formData.level}
               onChange={handleInputChange}
+              // ADDED: text-gray-800 for select text color
               className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-gray-800 bg-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 hover:bg-orange-50 hover:border-orange-300 appearance-none"
             >
               <option value="">เลือกระดับของคุณ</option>
@@ -366,7 +373,8 @@ export default function DevSignupForm() {
               name="experience"
               value={formData.experience}
               onChange={handleInputChange}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 bg-white/50 resize-none h-32"
+              // ADDED: text-gray-800 for textarea text color, placeholder-gray-500 for placeholder color
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 bg-white/50 resize-none h-32 text-gray-800 placeholder-gray-500"
               placeholder="กรอกชื่อค่าย / workshop ที่เคยเข้าร่วม หรือเขียนว่า 'ยังไม่เคยเข้าร่วม' ถ้าไม่มี"
             />
           </div>
