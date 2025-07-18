@@ -6,24 +6,14 @@
 import { NextResponse } from "next/server";
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
-import path from "path"; // Import path module to handle file paths
 
 // Function to open/create the SQLite database connection
 export async function openDB() {
-  let dbPath;
-  // In production (serverless), /tmp is typically the only writable directory.
-  // In development, we can use the project root.
-  if (process.env.NODE_ENV === "production") {
-    dbPath = path.join("/tmp", "user.sqlite");
-  } else {
-    dbPath = path.join(process.cwd(), "user.sqlite");
-  }
-
   const db = await open({
-    filename: dbPath,
+    // เปลี่ยน filename เป็น ":memory:" เพื่อให้ SQLite สร้างฐานข้อมูลใน RAM
+    filename: ":memory:",
     driver: sqlite3.Database,
   });
-
   // Create table if it doesn't exist
   // Note: For 'stuid' and 'email', added UNIQUE constraint.
   // 'interested' is TEXT, assuming comma-separated string.
