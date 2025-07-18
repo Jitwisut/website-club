@@ -34,33 +34,42 @@ export default function DevSignupForm() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [showError, setShowError] = useState(false); // เพิ่ม state สำหรับแสดงข้อผิดพลาด
+  const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(""); // State to store backend error message
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true); // <--- ตั้งค่าเป็น true เมื่อเริ่มส่ง
-    setShowSuccess(false); // <--- รีเซ็ตสถานะสำเร็จก่อนส่งใหม่
-    setShowError(false); // <--- รีเซ็ตสถานะข้อผิดพลาดก่อนส่งใหม่
+    setIsSubmitting(true);
+    setShowSuccess(false);
+    setShowError(false);
+    setErrorMessage(""); // Reset error message before new submission
 
     const dataToSend = {
       ...formData,
       interested: formData.interested.join(","),
     };
-    console.log(dataToSend);
+    console.log("Sending data:", dataToSend); // Log data being sent
+
     try {
       const response = await axios.post("/api/form", dataToSend);
       console.log("Form submission successful:", response.data);
-      setShowSuccess(true); // <--- ตั้งค่าเป็น true เมื่อส่งสำเร็จ
-      // อาจจะรีเซ็ตฟอร์มหลังจากส่งสำเร็จ
+      setShowSuccess(true);
+      // Optional: Reset form data after successful submission
       // setFormData({
       //   aka: "", name: "", stuid: "", faculty: "", email: "",
       //   disname: "", level: "", interested: [], experience: "",
       // });
     } catch (error) {
       console.error("Form submission error:", error);
-      setShowError(true); // <--- ตั้งค่าเป็น true เมื่อเกิดข้อผิดพลาด
+      // Check if the error has a response from the server with a custom message
+      if (error.response && error.response.data && error.response.data.error) {
+        setErrorMessage(error.response.data.error); // Use backend error message
+      } else {
+        setErrorMessage("An unexpected error occurred. Please try again."); // Generic fallback
+      }
+      setShowError(true);
     } finally {
-      setIsSubmitting(false); // <--- ตั้งค่าเป็น false เสมอเมื่อสิ้นสุดการส่ง (ไม่ว่าจะสำเร็จหรือล้มเหลว)
+      setIsSubmitting(false);
     }
   };
 
@@ -164,7 +173,7 @@ export default function DevSignupForm() {
             พร้อมเรียนรู้และสร้างสรรค์ไปด้วยกัน
           </p>
         </div>
-        {/* ใช้ <form> tag เพื่อให้สามารถกด Enter เพื่อส่งฟอร์มได้ และจัดการ handleSubmit ที่นี่ */}
+        {/* Use <form> tag to enable submission by pressing Enter and handle handleSubmit here */}
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Basic Information */}
           <div className="space-y-6">
@@ -183,8 +192,8 @@ export default function DevSignupForm() {
                 </label>
                 <input
                   type="text"
-                  id="aka" // เพิ่ม id เพื่อให้ label เชื่อมโยงได้
-                  name="aka" // <--- ตรงนี้ต้องเป็น "aka" เพื่อให้ตรงกับ key ใน formData
+                  id="aka"
+                  name="aka"
                   value={formData.aka}
                   onChange={handleInputChange}
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 bg-white/50"
@@ -201,8 +210,8 @@ export default function DevSignupForm() {
                 </label>
                 <input
                   type="text"
-                  id="name" // เพิ่ม id
-                  name="name" // <--- ตรงนี้ต้องเป็น "name"
+                  id="name"
+                  name="name"
                   value={formData.name}
                   onChange={handleInputChange}
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 bg-white/50"
@@ -219,8 +228,8 @@ export default function DevSignupForm() {
                 </label>
                 <input
                   type="text"
-                  id="stuid" // เพิ่ม id
-                  name="stuid" // <--- ตรงนี้ต้องเป็น "stuid"
+                  id="stuid"
+                  name="stuid"
                   value={formData.stuid}
                   onChange={handleInputChange}
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 bg-white/50"
@@ -237,8 +246,8 @@ export default function DevSignupForm() {
                 </label>
                 <input
                   type="text"
-                  id="faculty" // เพิ่ม id
-                  name="faculty" // <--- ตรงนี้ต้องเป็น "faculty"
+                  id="faculty"
+                  name="faculty"
                   value={formData.faculty}
                   onChange={handleInputChange}
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 bg-white/50"
@@ -255,8 +264,8 @@ export default function DevSignupForm() {
                 </label>
                 <input
                   type="email"
-                  id="email" // เพิ่ม id
-                  name="email" // <--- ตรงนี้ต้องเป็น "email"
+                  id="email"
+                  name="email"
                   value={formData.email}
                   onChange={handleInputChange}
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 bg-white/50"
@@ -273,8 +282,8 @@ export default function DevSignupForm() {
                 </label>
                 <input
                   type="text"
-                  id="disname" // เพิ่ม id
-                  name="disname" // <--- ตรงนี้ต้องเป็น "disname"
+                  id="disname"
+                  name="disname"
                   value={formData.disname}
                   onChange={handleInputChange}
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 bg-white/50"
@@ -291,7 +300,7 @@ export default function DevSignupForm() {
               ระดับการเขียนโปรแกรม
             </h2>
             <select
-              name="level" // <--- เปลี่ยน name เป็น "level" เพื่อให้ตรงกับ formData.level
+              name="level"
               value={formData.level}
               onChange={handleInputChange}
               className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-gray-800 bg-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 hover:bg-orange-50 hover:border-orange-300 appearance-none"
@@ -354,7 +363,7 @@ export default function DevSignupForm() {
             </h2>
 
             <textarea
-              name="experience" // <--- เปลี่ยน name เป็น "experience" เพื่อให้ตรงกับ formData.experience
+              name="experience"
               value={formData.experience}
               onChange={handleInputChange}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 bg-white/50 resize-none h-32"
@@ -365,7 +374,7 @@ export default function DevSignupForm() {
           {/* Submit Button */}
           <div className="flex justify-center pt-4">
             <button
-              type="submit" // <--- type="submit" ควรอยู่บน <button> ภายใน <form>
+              type="submit"
               disabled={isSubmitting}
               className={`relative overflow-hidden bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-semibold px-8 py-4 rounded-full shadow-lg transition-all duration-200 transform hover:scale-105 ${
                 isSubmitting ? "opacity-75 cursor-not-allowed" : ""
@@ -386,8 +395,7 @@ export default function DevSignupForm() {
               </div>
             </button>
           </div>
-        </form>{" "}
-        {/* ปิด tag <form> ที่นี่ */}
+        </form>
         {/* Success Message */}
         {showSuccess && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -412,7 +420,7 @@ export default function DevSignupForm() {
               <h3 className="text-2xl font-bold text-gray-800 mb-2">
                 สมัครสมาชิกสำเร็จ!
               </h3>
-              <p className="text-gray-600">ยินดีตอนรับเข้าสู่ชมรม</p>
+              <p className="text-gray-600">ยินดีต้อนรับเข้าสู่ชมรม</p>
               <button
                 onClick={() => setShowSuccess(false)}
                 className="mt-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-2 rounded-full transition-colors"
@@ -422,7 +430,7 @@ export default function DevSignupForm() {
             </div>
           </div>
         )}
-        {/* Error Message (เพิ่มเข้ามา) */}
+        {/* Error Message */}
         {showError && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white rounded-2xl p-8 max-w-md mx-4 text-center">
@@ -446,8 +454,9 @@ export default function DevSignupForm() {
               <h3 className="text-2xl font-bold text-gray-800 mb-2">
                 เกิดข้อผิดพลาด!
               </h3>
+              {/* Display backend error message here */}
               <p className="text-gray-600">
-                ไม่สามารถส่งใบสมัครได้ กรุณาลองใหม่อีกครั้ง
+                {errorMessage || "ไม่สามารถส่งใบสมัครได้ กรุณาลองใหม่อีกครั้ง"}
               </p>
               <button
                 onClick={() => setShowError(false)}
