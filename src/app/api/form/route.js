@@ -109,6 +109,18 @@ export async function POST(request) {
       INSERT INTO users (aka, name, stuid, faculty, email, disname, level, interested, experience)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
+    const queriescheck = `SELECT stuid,email FROM users WHERE stuid=? OR email=?`;
+    const existingUser = await db.get(queriescheck, [stuid, email]);
+
+    if (existingUser) {
+      return NextResponse.json(
+        {
+          error: "อีเมลหรือรหัสนักศึกษามีคนใช้งานไปแล้ว",
+        },
+
+        { status: 400 }
+      );
+    }
     const values = [
       aka.trim(),
       name.trim(),
