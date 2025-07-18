@@ -198,7 +198,7 @@ export default function DevSignupForm() {
                   onChange={handleInputChange}
                   // ADDED: text-gray-800 for input text color, placeholder-gray-500 for placeholder color
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 bg-white/50 text-gray-800 placeholder-gray-500"
-                  placeholder="ชื่อเล่นที่ใช้ในชุมชน"
+                  placeholder="ชื่อเล่นที่ใช้ในชมรม"
                 />
               </div>
 
@@ -361,7 +361,6 @@ export default function DevSignupForm() {
               })}
             </div>
           </div>
-
           {/* Workshops */}
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
@@ -375,10 +374,23 @@ export default function DevSignupForm() {
               onChange={handleInputChange}
               // ADDED: text-gray-800 for textarea text color, placeholder-gray-500 for placeholder color
               className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 bg-white/50 resize-none h-32 text-gray-800 placeholder-gray-500"
-              placeholder="กรอกชื่อค่าย / workshop ที่เคยเข้าร่วม หรือเขียนว่า 'ยังไม่เคยเข้าร่วม' ถ้าไม่มี"
+              placeholder="ประสบการณ์ Workshop/ความถนัดด้านอื่นๆ(ใส่ภาษาโปรแกรมมิ่งที่เคยศึกษาได้)"
             />
           </div>
-
+          <div className="text-gray-700 text-center text-sm leading-relaxed max-w-2xl mx-auto">
+            <p className="mb-2">
+              ชมรมเดฟหลังห้องของเรา
+              เกิดจากความตั้งใจอยากรวมตัวของเหล่าเดฟจากทุกสายงาน ไม่ว่าจะสายเว็บ
+              เกม แอป หรือฮาร์ดแวร์ ก็มาเจอกันตรงนี้ได้
+              ที่นี่เราจะจัดพื้นที่ไว้สำหรับแลกเปลี่ยนความรู้ ช่วยกันติว
+              แชร์โปรเจกต์ และหาเพื่อนลงแข่งฮัคกาธอนหรือเวทีแข่งขันต่าง ๆ
+              ทั้งในมหา'ลัยและนอกสถานที่ ไม่ต้องเก่งก็มาได้ แค่มีใจรักในการพัฒนา
+              อยากเรียนรู้ และอยากมีเพื่อนร่วมทาง เราเชื่อว่าทุกคนมีของ
+              และที่นี่คือที่ที่คุณจะได้ปล่อยของนั้นออกมา
+              ถ้าคุณกำลังมองหาชมรมที่เขียนโค้ดไป หัวเราะไป
+              แถมยังได้เติบโตไปพร้อมกัน Dev Behind the Room กำลังรอคุณอยู่
+            </p>
+          </div>
           {/* Submit Button */}
           <div className="flex justify-center pt-4">
             <button
