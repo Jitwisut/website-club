@@ -1,6 +1,7 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+
 import {
   User,
   Mail,
@@ -72,7 +73,6 @@ export default function DevSignupForm() {
       setIsSubmitting(false);
     }
   };
-
   const programmingLevels = [
     {
       id: "ไม่เคยเลย (แต่อยากเริ่ม)",
@@ -416,14 +416,14 @@ export default function DevSignupForm() {
             </button>
           </div>
         </form>
-        {/* Success Message */}
+        {/* Success Message Modal */}
         {showSuccess && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl p-8 max-w-md mx-4 text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+          <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+            <div className="bg-white text-center rounded-3xl shadow-2xl w-full max-w-xs sm:max-w-sm md:max-w-md mx-auto transform transition-all duration-300 scale-100">
+              <div className="p-6 sm:p-8 md:p-10">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
                   <svg
-                    className="w-5 h-5 text-white"
+                    className="w-8 h-8 sm:w-10 sm:h-10 text-green-500"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -436,28 +436,38 @@ export default function DevSignupForm() {
                     />
                   </svg>
                 </div>
+
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-3 sm:mb-4">
+                  🎉 สมัครสมาชิกสำเร็จ!
+                </h2>
+
+                <p className="text-gray-600 text-sm sm:text-base md:text-lg mb-4 sm:mb-6 leading-relaxed">
+                  ยินดีต้อนรับเข้าสู่ชมรม Dev Behind the Room
+                  <br />
+                  <span className="text-orange-500 font-medium">
+                    เราจะติดต่อกลับโดยเร็วที่สุด!
+                  </span>
+                </p>
+
+                <button
+                  onClick={() => setShowSuccess(false)}
+                  className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold px-6 sm:px-8 py-2.5 sm:py-3 rounded-full transition-all duration-200 transform hover:scale-105 shadow-lg text-sm sm:text-base w-full sm:w-auto"
+                >
+                  ปิด
+                </button>
               </div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                สมัครสมาชิกสำเร็จ!
-              </h3>
-              <p className="text-gray-600">ยินดีต้อนรับเข้าสู่ชมรม</p>
-              <button
-                onClick={() => setShowSuccess(false)}
-                className="mt-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-2 rounded-full transition-colors"
-              >
-                ปิด
-              </button>
             </div>
           </div>
         )}
-        {/* Error Message */}
+
+        {/* Error Message Modal */}
         {showError && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl p-8 max-w-md mx-4 text-center">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+          <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+            <div className="bg-white text-center rounded-3xl shadow-2xl w-full max-w-xs sm:max-w-sm md:max-w-md mx-auto transform transition-all duration-300 scale-100">
+              <div className="p-6 sm:p-8 md:p-10">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
                   <svg
-                    className="w-5 h-5 text-white"
+                    className="w-8 h-8 sm:w-10 sm:h-10 text-red-500"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -470,20 +480,23 @@ export default function DevSignupForm() {
                     />
                   </svg>
                 </div>
+
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-3 sm:mb-4">
+                  ⚠️ เกิดข้อผิดพลาด!
+                </h2>
+
+                <p className="text-gray-600 text-sm sm:text-base md:text-lg mb-4 sm:mb-6 leading-relaxed">
+                  {errorMessage ||
+                    "ไม่สามารถส่งใบสมัครได้ กรุณาลองใหม่อีกครั้ง"}
+                </p>
+
+                <button
+                  onClick={() => setShowError(false)}
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold px-6 sm:px-8 py-2.5 sm:py-3 rounded-full transition-all duration-200 transform hover:scale-105 shadow-lg text-sm sm:text-base w-full sm:w-auto"
+                >
+                  ปิด
+                </button>
               </div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                เกิดข้อผิดพลาด!
-              </h3>
-              {/* Display backend error message here */}
-              <p className="text-gray-600">
-                {errorMessage || "ไม่สามารถส่งใบสมัครได้ กรุณาลองใหม่อีกครั้ง"}
-              </p>
-              <button
-                onClick={() => setShowError(false)}
-                className="mt-4 bg-red-500 hover:bg-red-600 text-white font-semibold px-6 py-2 rounded-full transition-colors"
-              >
-                ปิด
-              </button>
             </div>
           </div>
         )}
